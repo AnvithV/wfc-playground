@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wave Function Collapse</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">Procedural tiler</p>
+          <h1>Wave Function Collapse</h1>
+          <p>
+            Generate tilings from <code>connects.xml</code>, watch the solver step through time,
+            and scrub or autoplay the capture. Press <kbd>R</kbd> to re-run at any moment.
+          </p>
+        </div>
+        <div class="readout" aria-live="polite">
+          <div class="metric">
+            <span>Status</span>
+            <strong id="statStatus">Ready</strong>
+          </div>
+          <div class="metric">
+            <span>Seed</span>
+            <strong id="statSeed">—</strong>
+          </div>
+          <div class="metric">
+            <span>Attempts</span>
+            <strong id="statAttempts">0</strong>
+          </div>
+          <div class="metric">
+            <span>Grid</span>
+            <strong id="statGrid">—</strong>
+          </div>
+        </div>
+      </header>
+
+      <section class="stage">
+        <div class="viewport" id="viewport">
+          <img id="frameImage" alt="Generated layout" />
+          <canvas id="constraintCanvas" aria-hidden="true"></canvas>
+          <div class="overlay" id="viewportOverlay">
+            <div class="spinner"></div>
+            <p>Generating…</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="mode-bar" id="modeBar" aria-live="polite">
+        <div class="mode-chip" data-mode="context">Context (C): on</div>
+        <div class="mode-chip" data-mode="noise">Noise (N): off</div>
+        <div class="mode-chip" data-mode="pattern">Pattern (P): weighted</div>
+        <div class="mode-chip" data-mode="locator">Locator (L): entropy</div>
+      </section>
+
+      <section class="control-panel">
+        <div class="seed-block">
+          <label for="seedInput">Seed</label>
+          <div class="seed-row">
+            <input
+              id="seedInput"
+              type="text"
+              placeholder="Leave blank for random"
+              spellcheck="false"
+            />
+            <button type="button" id="seedRandom" class="secondary">Shuffle</button>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" id="regenBtn" class="primary">Regenerate (R)</button>
+          <button type="button" id="playBtn" class="secondary" disabled>Play</button>
+          <button type="button" id="saveBtn" class="secondary" disabled>Save PNG</button>
+        </div>
+      </section>
+
+      <section class="timeline">
+        <label for="frameSlider">Step</label>
+        <input id="frameSlider" type="range" min="0" max="0" value="0" step="1" disabled />
+        <span id="frameLabel">0 / 0</span>
+      </section>
+
+      <footer class="hint">
+        Tip: ← → scrub · Space play/pause · R regenerate · C context · N noise · P pattern · L locator
+      </footer>
+    </div>
+
+    <script src="main.js" type="module"></script>
+  </body>
+</html>
+

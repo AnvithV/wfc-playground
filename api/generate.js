@@ -1,16 +1,10 @@
 const path = require('path');
-const express = require('express');
-const { createGenerator, parseModeOptions } = require('./lib/generator');
-
-const ROOT = path.resolve(__dirname, '..');
-const XML_PATH = path.join(ROOT, 'connects.xml');
-const TILES_PATH = path.join(ROOT, 'tileset');
+const { createGenerator, parseModeOptions } = require('../src/lib/generator');
 
 const WIDTH = parseInt(process.env.WFC_WIDTH || '24', 10);
 const HEIGHT = parseInt(process.env.WFC_HEIGHT || '24', 10);
 const LIMIT = parseInt(process.env.WFC_LIMIT || '-1', 10);
 const RESTARTS = parseInt(process.env.WFC_RESTARTS || '120', 10);
-const PORT = parseInt(process.env.PORT || '3000', 10);
 const DEFAULT_FRAME_LIMIT = WIDTH * HEIGHT + 20;
 const FRAME_LIMIT = parseInt(
   process.env.WFC_FRAME_LIMIT || `${DEFAULT_FRAME_LIMIT}`,
@@ -20,30 +14,26 @@ const FRAME_LIMIT = parseInt(
 const generator = createGenerator({
   width: WIDTH,
   height: HEIGHT,
-  xmlPath: XML_PATH,
-  tilesPath: TILES_PATH,
+  xmlPath: path.join(process.cwd(), 'connects.xml'),
+  tilesPath: path.join(process.cwd(), 'tileset'),
   limit: LIMIT,
   restarts: RESTARTS,
   frameLimit: FRAME_LIMIT,
 });
 
-const app = express();
-
-app.use(express.static(path.join(ROOT, 'public')));
-
-app.get('/api/generate', async (req, res) => {
+module.exports = async function handler(req, res) {
   const seedParam = parseInt(req.query.seed, 10);
   const seed = Number.isFinite(seedParam) ? seedParam : Date.now();
-  const modeOptions = parseModeOptions(req.query);
+  const modes = parseModeOptions(req.query);
 
   try {
-    const { buffer, attempts, finalSeed, frames, modes } = generator.generate(
+    const { buffer, attempts, finalSeed, frames } = generator.generate(
       seed,
-      modeOptions,
+      modes,
     );
     const base64 = buffer.toString('base64');
-    res.set('Cache-Control', 'no-store');
-    res.json({
+    res.setHeader('Cache-Control', 'no-store');
+    res.status(200).json({
       image: `data:image/png;base64,${base64}`,
       frames:
         frames && frames.length > 0
@@ -56,13 +46,9 @@ app.get('/api/generate', async (req, res) => {
       modes,
     });
   } catch (err) {
-    console.error('[WFC] Generation failed:', err);
+    console.error('[WFC] API generation failed:', err);
     res.status(500).json({ error: 'Generation failed, please try again.' });
   }
-});
+};
 
-app.listen(PORT, () => {
-  console.log(`WFC server listening on http://localhost:${PORT}`);
-  console.log('Press R in the browser UI or click "Regenerate" to refresh the layout.');
-});
 
